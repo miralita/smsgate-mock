@@ -1,0 +1,324 @@
+basePath: /api/v1
+definitions:
+  api.ErrorMessage:
+    properties:
+      error:
+        type: string
+    type: object
+  api.ListMessageOut:
+    properties:
+      expirationTimeout:
+        type: integer
+      messageText:
+        type: string
+      messageType:
+        type: string
+      messageUuid:
+        type: string
+      phoneNumber:
+        type: string
+      sent:
+        type: string
+    type: object
+  api.MessageIn:
+    properties:
+      expirationTimeout:
+        type: integer
+      login:
+        type: string
+      messageText:
+        type: string
+      messageType:
+        type: string
+      password:
+        type: string
+      phoneNumber:
+        type: string
+      senderName:
+        type: string
+    type: object
+  api.MessageOut:
+    properties:
+      created:
+        type: string
+      messageUuid:
+        type: string
+      status:
+        type: string
+    type: object
+  api.MessageStatusOut:
+    properties:
+      messageUuid:
+        type: string
+      sent:
+        type: string
+      status:
+        type: string
+    type: object
+  api.SenderIn:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  api.SenderOut:
+    properties:
+      login:
+        type: string
+      senderUuid:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a simple emulator for SMS-gate
+  title: SMS-gate Mock
+  version: "1.0"
+paths:
+  /message:
+    get:
+      parameters:
+      - description: Limit, default 10
+        in: query
+        name: limit
+        type: string
+      - description: Offset, default 0
+        in: query
+        name: offset
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.ListMessageOut'
+            type: array
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: List messages
+    post:
+      parameters:
+      - description: Message data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/api.MessageIn'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.MessageOut'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: Create new SMS
+  /message/{messageUuid}:
+    delete:
+      parameters:
+      - description: Message ID
+        in: path
+        name: messageUuid
+        required: true
+        type: string
+      responses:
+        "204": {}
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: Delete message
+  /message/{messageUuid}/status:
+    get:
+      parameters:
+      - description: Message ID
+        in: path
+        name: messageUuid
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.MessageStatusOut'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: Get SMS status
+  /message/search:
+    get:
+      parameters:
+      - description: Phone number
+        in: query
+        name: phoneNumber
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.ListMessageOut'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: Search messages by phone number
+  /sender:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.SenderOut'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: List senders
+    post:
+      parameters:
+      - description: New sender
+        in: body
+        name: sender
+        required: true
+        schema:
+          $ref: '#/definitions/api.SenderIn'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.SenderOut'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: Create new sender
+  /sender/{senderUuid}:
+    delete:
+      parameters:
+      - description: Sender ID
+        in: path
+        name: senderUuid
+        required: true
+        type: string
+      responses:
+        "204": {}
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: Delete sender
+    patch:
+      parameters:
+      - description: Sender ID
+        in: path
+        name: senderUuid
+        required: true
+        type: string
+      - description: Edited sender
+        in: body
+        name: sender
+        required: true
+        schema:
+          $ref: '#/definitions/api.SenderOut'
+      responses:
+        "204": {}
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: Edit sender
+  /sender/check_connection/{senderUuid}:
+    post:
+      parameters:
+      - description: Sender ID
+        in: path
+        name: senderUuid
+        required: true
+        type: string
+      - description: Login and password
+        in: body
+        name: sender
+        required: true
+        schema:
+          $ref: '#/definitions/api.SenderIn'
+      responses:
+        "204": {}
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/api.ErrorMessage'
+      summary: Check sender's login and password
+swagger: "2.0"
+x-extension-openapi:
+  example: value on a json format
